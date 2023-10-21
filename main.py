@@ -237,7 +237,7 @@ def router(paramstring):
         elif mode == "setkey":
             apikey = xbmcgui.Dialog().input('Enter your TMDb API key', type=xbmcgui.INPUT_ALPHANUM)
             if apikey:
-                ADDON.setSetting('tmdb_key', apikey)
+                ADDON.setSetting("tmdb_key", apikey)
                 xbmc.executebuiltin('Container.Refresh')
             else:
                 quit()
