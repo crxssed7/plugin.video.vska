@@ -99,7 +99,7 @@ def _listing(itms):
         else:
             m = "listing"
             is_folder = True
-        url = _build_url(mode=m)
+        url = _build_url(mode=m, external_id=tmdb_id)
         xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
@@ -112,6 +112,18 @@ def list_movies(query):
     results = search_movie(query)
     _listing(results)
 
+def play(external_id):
+    """
+    Plays a movie or episode
+    """
+    url = movie(external_id)
+    play_item = xbmcgui.ListItem(path=url)
+    xbmcplugin.setResolvedUrl(HANDLE, True, listitem=play_item)
+
+def validate_id(external_id):
+    if not external_id:
+        raise ValueError("You must provide an external id")
+
 def router(paramstring):
     """
     Router function that calls other functions
@@ -123,12 +135,18 @@ def router(paramstring):
         main()
     else:
         mode = params.get("mode", None)
+        external_id = params.get("external_id", None)
+        season_number = params.get("season", None)
+        episode_number = params.get("episode", None)
         if mode == "searchmovie":
             query = xbmcgui.Dialog().input('Search movie...', type=xbmcgui.INPUT_ALPHANUM)
             if query:
                 list_movies(query)
             else:
                 quit()
+        elif mode == "play":
+            validate_id(external_id)
+            play(external_id)
         else:
             raise ValueError("Specify a valid mode.")
 
