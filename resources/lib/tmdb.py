@@ -3,20 +3,19 @@ Basic interface with TMDb API
 """
 import requests
 
-API_KEY = ""
-HEADERS = {
-    "Authorization": "Bearer " + API_KEY
-}
 BASE_URL = "https://api.themoviedb.org/3/"
 BASE_POSTER_PATH = "https://www.themoviedb.org/t/p/w600_and_h900_bestv2"
 BASE_BACKDROP_PATH = "https://www.themoviedb.org/t/p/original"
 
-def search_movie(query, page = 1):
+def search_movie(query, key, page = 1):
     """
     Searches the TMDb API for movies
     """
+    headers = {
+        "Authorization": "Bearer " + key
+    }
     url = BASE_URL + "search/movie?query=" + query + "&include_adult=false&language=en-US&page=" + str(page)
-    results = requests.get(url, headers=HEADERS, timeout=60)
+    results = requests.get(url, headers=headers, timeout=60)
     if not results.ok:
         return []
     json = results.json()
@@ -38,12 +37,15 @@ def search_movie(query, page = 1):
         })
     return movies
 
-def search_tv(query, page = 1):
+def search_tv(query, key, page = 1):
     """
     Searches the TMDb API for shows
     """
+    headers = {
+        "Authorization": "Bearer " + key
+    }
     url = BASE_URL + "search/tv?query=" + query + "&include_adult=false&language=en-US&page=" + str(page)
-    results = requests.get(url, headers=HEADERS, timeout=60)
+    results = requests.get(url, headers=headers, timeout=60)
     if not results.ok:
         return []
     json = results.json()
@@ -65,12 +67,15 @@ def search_tv(query, page = 1):
         })
     return shows
 
-def get_seasons(tmdb_id):
+def get_seasons(tmdb_id, key):
     """
     Returns all the seasons in a show
     """
+    headers = {
+        "Authorization": "Bearer " + key
+    }
     url = BASE_URL + "tv/" + str(tmdb_id)
-    result = requests.get(url, headers=HEADERS, timeout=60)
+    result = requests.get(url, headers=headers, timeout=60)
     if not result.ok:
         return []
     json = result.json()
@@ -95,9 +100,12 @@ def get_seasons(tmdb_id):
         })
     return found
 
-def get_episodes(tmdb_id, season):
+def get_episodes(tmdb_id, season, key):
+    headers = {
+        "Authorization": "Bearer " + key
+    }
     url = BASE_URL + "tv/" + str(tmdb_id) + "/season/" + str(season)
-    result = requests.get(url, headers=HEADERS, timeout=60)
+    result = requests.get(url, headers=headers, timeout=60)
     if not result.ok:
         return []
     json = result.json()

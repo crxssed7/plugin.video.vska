@@ -24,6 +24,7 @@ else:
 URL = sys.argv[0]
 HANDLE = int(sys.argv[1])
 ADDON = xbmcaddon.Addon(id="plugin.video.vska")
+TMDB_KEY = ADDON.getSetting("tmdb_key")
 
 # pylint: disable=bare-except
 try:
@@ -65,6 +66,15 @@ def main():
     tv_item.setArt({"icon": os.path.join(ICONS_DIR, "tv.png")})
     url = _build_url(mode="searchtv")
     xbmcplugin.addDirectoryItem(HANDLE, url, tv_item, True)
+
+    key_item = xbmcgui.ListItem(label="TMDb API Key")
+    key_item.setInfo("video", {
+        "title": "TV",
+        "mediatype": "video"
+    })
+    key_item.setArt({"icon": os.path.join(ICONS_DIR, "key.png")})
+    url = _build_url(mode="setkey")
+    xbmcplugin.addDirectoryItem(HANDLE, url, key_item, True)
 
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
     xbmcplugin.endOfDirectory(HANDLE)
@@ -135,28 +145,28 @@ def list_movies(query):
     """
     Searches for movies with given query and displays them in a Kodi directory
     """
-    results = search_movie(query)
+    results = search_movie(query, TMDB_KEY)
     _listing(results)
 
 def list_tv(query):
     """
     Searches for tv shows with given query and displays them in a Kodi directory
     """
-    results = search_tv(query)
+    results = search_tv(query, TMDB_KEY)
     _listing(results)
 
 def list_seasons(external_id):
     """
     Lists all seasons in a given show
     """
-    seasons = get_seasons(external_id)
+    seasons = get_seasons(external_id, TMDB_KEY)
     _listing(seasons)
 
 def list_episodes(external_id, season_number):
     """
     Lists all episodes in a given season
     """
-    episodes = get_episodes(external_id, season_number)
+    episodes = get_episodes(external_id, season_number, TMDB_KEY)
     _listing(episodes)
 
 def play(external_id, season_number, episode_number):
@@ -224,6 +234,13 @@ def router(paramstring):
         elif mode == "play":
             validate_id(external_id)
             play(external_id, season_number, episode_number)
+        elif mode == "setkey":
+            apikey = xbmcgui.Dialog().input('Enter your TMDb API key', type=xbmcgui.INPUT_ALPHANUM)
+            if apikey:
+                ADDON.setSetting('tmdb_key', apikey)
+                xbmc.executebuiltin('Container.Refresh')
+            else:
+                quit()
         else:
             raise ValueError("Specify a valid mode.")
 
