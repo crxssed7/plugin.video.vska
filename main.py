@@ -115,6 +115,7 @@ def _listing(itms):
                 "external_id": tmdb_id,
                 "season": season
             }
+            is_folder = True
         elif _type == "episode":
             urlparams = {
                 "mode": "play",
