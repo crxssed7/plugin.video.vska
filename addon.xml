@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<addon id="plugin.video.vska" name="vska" version="0.0.12" provider-name="crxssed">
+<addon id="plugin.video.vska" name="vska" version="0.0.13" provider-name="crxssed">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.requests" />

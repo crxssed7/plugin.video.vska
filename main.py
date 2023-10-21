@@ -12,7 +12,7 @@ import xbmcplugin
 import xbmcvfs
 # pylint: enable=import-error
 
-from resources.lib.tmdb import search_movie, search_tv, get_seasons
+from resources.lib.tmdb import search_movie, search_tv, get_seasons, get_episodes
 from resources.lib.vidsrc import movie, episode
 
 if sys.version_info >= (3,0,0):
@@ -82,8 +82,9 @@ def _listing(itms):
         plot = itm["plot"]
         poster = itm["poster"]
         fanart = itm["fanart"]
-        playable = itm["playable"]
         _type = itm["type"]
+        season = itm.get("season", None)
+        episode_number = itm.get("episode", None)
         list_item.setInfo("video", {
             "title": title,
             "plot": plot,
@@ -93,20 +94,36 @@ def _listing(itms):
             "icon": poster,
             "fanart": fanart
         })
-        if playable:
+        if _type == "movie":
             urlparams = {
                 "mode": "play",
                 "external_id": tmdb_id
             }
             is_folder = False
             list_item.setProperty('IsPlayable', 'true')
-        else:
+        elif _type == "tv":
             urlparams = {
                 "mode": "listing",
-                "listingtype": "seasons" if _type == "tv" else "episodes",
+                "listingtype": "seasons",
                 "external_id": tmdb_id
             }
             is_folder = True
+        elif _type == "season":
+            urlparams = {
+                "mode": "listing",
+                "listingtype": "episodes",
+                "external_id": tmdb_id,
+                "season": season
+            }
+        elif _type == "episode":
+            urlparams = {
+                "mode": "play",
+                "external_id": tmdb_id,
+                "season": season,
+                "episode": episode_number
+            }
+            is_folder = False
+            list_item.setProperty('IsPlayable', 'true')
         url = _build_url(**urlparams)
         xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 
@@ -134,11 +151,21 @@ def list_seasons(external_id):
     seasons = get_seasons(external_id)
     _listing(seasons)
 
-def play(external_id):
+def list_episodes(external_id, season_number):
+    """
+    Lists all episodes in a given season
+    """
+    episodes = get_episodes(external_id, season_number)
+    _listing(episodes)
+
+def play(external_id, season_number, episode_number):
     """
     Plays a movie or episode
     """
-    url = movie(external_id)
+    if season_number and episode_number:
+        url = episode(external_id, season_number, episode_number)
+    else:
+        url = movie(external_id)
     play_item = xbmcgui.ListItem(path=url)
     xbmcplugin.setResolvedUrl(HANDLE, True, listitem=play_item)
 
@@ -153,6 +180,10 @@ def validate_listingtype(listingtype):
     listingtypes = ["seasons", "episdes"]
     if listingtype not in listingtypes:
         raise ValueError("You must provide a valid listing type: " + listingtype)
+
+def validate_season(season):
+    if not season:
+        raise ValueError("You must specify a season")
 
 def router(paramstring):
     """
@@ -187,10 +218,11 @@ def router(paramstring):
             if listingtype == "seasons":
                 list_seasons(external_id)
             else:
-                raise NotImplementedError("Not implemented")
+                validate_season(season_number)
+                list_episodes(external_id, season_number)
         elif mode == "play":
             validate_id(external_id)
-            play(external_id)
+            play(external_id, season_number, episode_number)
         else:
             raise ValueError("Specify a valid mode.")
 

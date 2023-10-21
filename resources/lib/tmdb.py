@@ -77,18 +77,47 @@ def get_seasons(tmdb_id):
     found = []
     seasons = json["seasons"]
     for season in seasons:
-        tmdb_id = season["id"]
+        tmdb_id = json["id"]
         title = season["name"]
         plot = season["overview"]
         poster = BASE_POSTER_PATH + season["poster_path"]
         fanart = BASE_BACKDROP_PATH + json["backdrop_path"] if json["backdrop_path"] else None
+        number = season["season_number"]
         found.append({
             "id": tmdb_id,
             "title": title,
             "plot": plot,
             "poster": poster,
             "fanart": fanart,
+            "season": number,
             "playable": False,
             "type": "season"
+        })
+    return found
+
+def get_episodes(tmdb_id, season):
+    url = BASE_URL + "tv/" + str(tmdb_id) + "/season/" + str(season)
+    result = requests.get(url, headers=HEADERS, timeout=60)
+    if not result.ok:
+        return []
+    json = result.json()
+    found = []
+    episodes = json["episodes"]
+    for episode in episodes:
+        title = episode["name"]
+        plot = episode["overview"]
+        poster = BASE_BACKDROP_PATH + episode["still_path"] if episode["still_path"] else None
+        fanart = BASE_BACKDROP_PATH + episode["still_path"] if episode["still_path"] else None
+        number = episode["episode_number"]
+        found.append({
+            "id": tmdb_id,
+            "title": title,
+            "plot": plot,
+            "poster": poster,
+            "fanart": fanart,
+            "season": season,
+            "episode": number,
+            "playable": True,
+            "type": "episode"
         })
     return found
