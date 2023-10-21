@@ -104,11 +104,11 @@ def get_episodes(tmdb_id, season):
     found = []
     episodes = json["episodes"]
     for episode in episodes:
-        title = episode["name"]
+        number = episode["episode_number"]
+        title = "Episode " + str(number) + ": " + episode["name"]
         plot = episode["overview"]
         poster = BASE_BACKDROP_PATH + episode["still_path"] if episode["still_path"] else None
         fanart = BASE_BACKDROP_PATH + episode["still_path"] if episode["still_path"] else None
-        number = episode["episode_number"]
         found.append({
             "id": tmdb_id,
             "title": title,

@@ -66,7 +66,7 @@ def main():
     url = _build_url(mode="searchtv")
     xbmcplugin.addDirectoryItem(HANDLE, url, tv_item, True)
 
-    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_SIZE)
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
     xbmcplugin.endOfDirectory(HANDLE)
 
 def _listing(itms):
@@ -128,7 +128,7 @@ def _listing(itms):
         url = _build_url(**urlparams)
         xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 
-    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
     xbmcplugin.endOfDirectory(HANDLE)
 
 def list_movies(query):
