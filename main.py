@@ -12,7 +12,7 @@ import xbmcplugin
 import xbmcvfs
 # pylint: enable=import-error
 
-from resources.lib.tmdb import search_movie
+from resources.lib.tmdb import search_movie, search_tv, get_seasons
 from resources.lib.vidsrc import movie, episode
 
 if sys.version_info >= (3,0,0):
@@ -83,6 +83,7 @@ def _listing(itms):
         poster = itm["poster"]
         fanart = itm["fanart"]
         playable = itm["playable"]
+        _type = itm["type"]
         list_item.setInfo("video", {
             "title": title,
             "plot": plot,
@@ -93,13 +94,20 @@ def _listing(itms):
             "fanart": fanart
         })
         if playable:
-            m = "play"
+            urlparams = {
+                "mode": "play",
+                "external_id": tmdb_id
+            }
             is_folder = False
             list_item.setProperty('IsPlayable', 'true')
         else:
-            m = "listing"
+            urlparams = {
+                "mode": "listing",
+                "listingtype": "seasons" if _type == "tv" else "episodes",
+                "external_id": tmdb_id
+            }
             is_folder = True
-        url = _build_url(mode=m, external_id=tmdb_id)
+        url = _build_url(**urlparams)
         xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
@@ -112,6 +120,20 @@ def list_movies(query):
     results = search_movie(query)
     _listing(results)
 
+def list_tv(query):
+    """
+    Searches for tv shows with given query and displays them in a Kodi directory
+    """
+    results = search_tv(query)
+    _listing(results)
+
+def list_seasons(external_id):
+    """
+    Lists all seasons in a given show
+    """
+    seasons = get_seasons(external_id)
+    _listing(seasons)
+
 def play(external_id):
     """
     Plays a movie or episode
@@ -123,6 +145,14 @@ def play(external_id):
 def validate_id(external_id):
     if not external_id:
         raise ValueError("You must provide an external id")
+
+def validate_listingtype(listingtype):
+    if not listingtype:
+        raise ValueError("You must provide a listing type")
+
+    listingtypes = ["seasons", "episdes"]
+    if listingtype not in listingtypes:
+        raise ValueError("You must provide a valid listing type: " + listingtype)
 
 def router(paramstring):
     """
@@ -138,12 +168,26 @@ def router(paramstring):
         external_id = params.get("external_id", None)
         season_number = params.get("season", None)
         episode_number = params.get("episode", None)
+        listingtype = params.get("listingtype", None)
         if mode == "searchmovie":
             query = xbmcgui.Dialog().input('Search movie...', type=xbmcgui.INPUT_ALPHANUM)
             if query:
                 list_movies(query)
             else:
                 quit()
+        elif mode == "searchtv":
+            query = xbmcgui.Dialog().input('Search tv...', type=xbmcgui.INPUT_ALPHANUM)
+            if query:
+                list_tv(query)
+            else:
+                quit()
+        elif mode == "listing":
+            validate_listingtype(listingtype)
+            validate_id(external_id)
+            if listingtype == "seasons":
+                list_seasons(external_id)
+            else:
+                raise NotImplementedError("Not implemented")
         elif mode == "play":
             validate_id(external_id)
             play(external_id)
