@@ -178,7 +178,7 @@ def validate_listingtype(listingtype):
     if not listingtype:
         raise ValueError("You must provide a listing type")
 
-    listingtypes = ["seasons", "episdes"]
+    listingtypes = ["seasons", "episodes"]
     if listingtype not in listingtypes:
         raise ValueError("You must provide a valid listing type: " + listingtype)
 
