@@ -1,4 +1,10 @@
-# TMDb Category
+# Kodi Media Center language file
+# Addon Name: vska
+# Addon id: plugin.video.vska
+# Addon Provider: crxssed
+msgid ""
+msgstr ""
+
 msgctxt "#30000"
 msgid "TMDb"
 msgstr ""
