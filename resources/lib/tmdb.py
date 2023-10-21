@@ -32,7 +32,7 @@ def search_movie(query, key, page = 1):
         tmdb_id = result["id"]
         title = result["title"] + " (" + _get_year(result["release_date"]) + ")"
         plot = result["overview"]
-        poster = BASE_POSTER_PATH + result["poster_path"]
+        poster = BASE_POSTER_PATH + result["poster_path"] if result["poster_path"] else None
         fanart = BASE_BACKDROP_PATH + result["backdrop_path"] if result["backdrop_path"] else None
         movies.append({
             "id": tmdb_id,
@@ -62,7 +62,7 @@ def search_tv(query, key, page = 1):
         tmdb_id = result["id"]
         title = result["name"]
         plot = result["overview"]
-        poster = BASE_POSTER_PATH + result["poster_path"]
+        poster = BASE_POSTER_PATH + result["poster_path"] if result["poster_path"] else None
         fanart = BASE_BACKDROP_PATH + result["backdrop_path"] if result["backdrop_path"] else None
         shows.append({
             "id": tmdb_id,
@@ -93,7 +93,7 @@ def get_seasons(tmdb_id, key):
         tmdb_id = json["id"]
         title = season["name"]
         plot = season["overview"]
-        poster = BASE_POSTER_PATH + season["poster_path"]
+        poster = BASE_POSTER_PATH + season["poster_path"] if season["poster_path"] else None
         fanart = BASE_BACKDROP_PATH + json["backdrop_path"] if json["backdrop_path"] else None
         number = season["season_number"]
         found.append({
