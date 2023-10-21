@@ -26,7 +26,7 @@ def search_movie(query, page = 1):
         title = result["title"]
         plot = result["overview"]
         poster = BASE_POSTER_PATH + result["poster_path"]
-        fanart = BASE_BACKDROP_PATH + result["backdrop_path"]
+        fanart = BASE_BACKDROP_PATH + result["backdrop_path"] if result["backdrop_path"] else None
         movies.append({
             "id": tmdb_id,
             "title": title,

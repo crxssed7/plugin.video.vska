@@ -78,7 +78,7 @@ def _listing(itms):
     for itm in itms:
         list_item = xbmcgui.ListItem(label=itm["title"])
         title = itm["title"]
-        href = itm["href"]
+        tmdb_id = itm["id"]
         plot = itm["plot"]
         poster = itm["poster"]
         fanart = itm["fanart"]
@@ -99,7 +99,7 @@ def _listing(itms):
         else:
             m = "listing"
             is_folder = True
-        url = _build_url(mode=m, source=href)
+        url = _build_url(mode=m)
         xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
