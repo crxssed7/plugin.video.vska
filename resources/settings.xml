@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <setting id="tmdb_key" value="" default=""/>
+    <category label="10000">
+        <setting label="10001" type="text" id="tmdb_key" default=""/>
+    </category>
 </settings>

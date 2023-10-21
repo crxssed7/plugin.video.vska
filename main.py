@@ -67,15 +67,6 @@ def main():
     url = _build_url(mode="searchtv")
     xbmcplugin.addDirectoryItem(HANDLE, url, tv_item, True)
 
-    key_item = xbmcgui.ListItem(label="TMDb API Key")
-    key_item.setInfo("video", {
-        "title": "TV",
-        "mediatype": "video"
-    })
-    key_item.setArt({"icon": os.path.join(ICONS_DIR, "key.png")})
-    url = _build_url(mode="setkey")
-    xbmcplugin.addDirectoryItem(HANDLE, url, key_item, True)
-
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
     xbmcplugin.endOfDirectory(HANDLE)
 
@@ -234,13 +225,6 @@ def router(paramstring):
         elif mode == "play":
             validate_id(external_id)
             play(external_id, season_number, episode_number)
-        elif mode == "setkey":
-            apikey = xbmcgui.Dialog().input('Enter your TMDb API key', type=xbmcgui.INPUT_ALPHANUM)
-            if apikey:
-                ADDON.setSetting("tmdb_key", apikey)
-                xbmc.executebuiltin('Container.Refresh')
-            else:
-                quit()
         else:
             raise ValueError("Specify a valid mode.")
 

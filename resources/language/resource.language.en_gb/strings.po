@@ -1,0 +1,8 @@
+# TMDb Category
+msgctxt "#10000"
+msgid "TMDb"
+msgstr ""
+
+msgctxt "#10001"
+msgid "TMDb API Key"
+msgstr ""
