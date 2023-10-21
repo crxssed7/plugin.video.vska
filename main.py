@@ -12,6 +12,7 @@ import xbmcplugin
 import xbmcvfs
 # pylint: enable=import-error
 
+from resources.lib.tmdb import search_movie
 from resources.lib.vidsrc import movie, episode
 
 if sys.version_info >= (3,0,0):
@@ -68,6 +69,49 @@ def main():
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_SIZE)
     xbmcplugin.endOfDirectory(HANDLE)
 
+def _listing(itms):
+    """
+    Creates a virtual Kodi directory with list items
+    """
+    xbmcplugin.setPluginCategory(HANDLE, "vska - listing")
+    xbmcplugin.setContent(HANDLE, "videos")
+    for itm in itms:
+        list_item = xbmcgui.ListItem(label=itm["title"])
+        title = itm["title"]
+        href = itm["href"]
+        plot = itm["plot"]
+        poster = itm["poster"]
+        fanart = itm["fanart"]
+        playable = itm["playable"]
+        list_item.setInfo("video", {
+            "title": title,
+            "plot": plot,
+            "mediatype": "video"
+        })
+        list_item.setArt({
+            "icon": poster,
+            "fanart": fanart
+        })
+        if playable:
+            m = "play"
+            is_folder = False
+            list_item.setProperty('IsPlayable', 'true')
+        else:
+            m = "listing"
+            is_folder = True
+        url = _build_url(mode=m, source=href)
+        xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+    xbmcplugin.endOfDirectory(HANDLE)
+
+def list_movies(query):
+    """
+    Searches for movies with given query and displays them in a Kodi directory
+    """
+    results = search_movie(query)
+    _listing(results)
+
 def router(paramstring):
     """
     Router function that calls other functions
@@ -78,7 +122,15 @@ def router(paramstring):
     if not params:
         main()
     else:
-        raise NotImplementedError("Not yet implemented.")
+        mode = params.get("mode", None)
+        if mode == "searchmovie":
+            query = xbmcgui.Dialog().input('Search movie...', type=xbmcgui.INPUT_ALPHANUM)
+            if query:
+                list_movies(query)
+            else:
+                quit()
+        else:
+            raise ValueError("Specify a valid mode.")
 
 if __name__ == '__main__':
     router(sys.argv[2][1:])
