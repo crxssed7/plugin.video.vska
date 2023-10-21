@@ -1,42 +1,72 @@
 """
-vska - btw idk what half of this does :)
+vska
 """
+import os
 import sys
-from urlparse import parse_qsl
 
+# pylint: disable=import-error
+import xbmc
+import xbmcaddon
 import xbmcgui
 import xbmcplugin
-from xbmcaddon import Addon
+import xbmcvfs
+# pylint: enable=import-error
 
 from resources.lib.vidsrc import movie, episode
 
+if sys.version_info >= (3,0,0):
+    from urllib.parse import urlencode, parse_qsl
+else:
+    from urllib import urlencode
+    from urlparse import parse_qsl
+
 URL = sys.argv[0]
 HANDLE = int(sys.argv[1])
+ADDON = xbmcaddon.Addon(id="plugin.video.vska")
 
-def play_video(url):
-    """
-    huhu you'll never guess what this function does
-    """
-    play_item = xbmcgui.ListItem(path=url)
-    xbmcplugin.setResolvedUrl(HANDLE, True, listitem=play_item)
+# pylint: disable=bare-except
+try:
+    ADDON_PATH = xbmcvfs.translatePath(ADDON.getAddonInfo("path"))
+except:
+    ADDON_PATH = xbmc.translatePath(ADDON.getAddonInfo("path")).decode("utf-8")
+# pylint: enable=bare-except
 
-def play_movie(external_id):
-    """
-    Plays a movie... I think?
-    """
-    url = movie(external_id=external_id)
-    if not url:
-        raise ValueError("movie: URL is none")
-    play_video(url)
+ICONS_DIR = os.path.join(ADDON_PATH, "resources", "images", "icons")
 
-def play_episode(external_id, season, episode_number):
+def _build_url(**kwargs):
     """
-    god help me i can't decipher this python function
+    Creates a URL for the addon, e.g.
+    plugin://plugin.video.vska/mode=searchtv
     """
-    url = episode(external_id=external_id, season=season, episode_number=episode_number)
-    if not url:
-        raise ValueError("episode: URL is none")
-    play_video(url)
+    return URL + "?" + urlencode(kwargs)
+
+def main():
+    """
+    Addon entry point. Displays 'Movie' and 'TV' buttons
+    """
+    xbmcplugin.setPluginCategory(HANDLE, "vska")
+    xbmcplugin.setContent(HANDLE, "videos")
+
+    movie_item = xbmcgui.ListItem(label="Movies")
+    movie_item.setInfo("video", {
+        "title": "Movies",
+        "mediatype": "video"
+    })
+    movie_item.setArt({"icon": os.path.join(ICONS_DIR, "movie.png")})
+    url = _build_url(mode="searchmovie")
+    xbmcplugin.addDirectoryItem(HANDLE, url, movie_item, True)
+
+    tv_item = xbmcgui.ListItem(label="TV")
+    tv_item.setInfo("video", {
+        "title": "TV",
+        "mediatype": "video"
+    })
+    tv_item.setArt({"icon": os.path.join(ICONS_DIR, "tv.png")})
+    url = _build_url(mode="searchtv")
+    xbmcplugin.addDirectoryItem(HANDLE, url, tv_item, True)
+
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_SIZE)
+    xbmcplugin.endOfDirectory(HANDLE)
 
 def router(paramstring):
     """
@@ -44,16 +74,11 @@ def router(paramstring):
     depending on the provided paramstring
     """
     params = dict(parse_qsl(paramstring))
-    external_id = params.get("id", None)
-    season = params.get("season", None)
-    episode_number = params.get("episode", None)
-    if not external_id:
-        raise ValueError("Missing external ID")
 
-    if season and episode:
-        play_episode(external_id=external_id, season=season, episode_number=episode_number)
+    if not params:
+        main()
     else:
-        play_movie(external_id=external_id)
+        raise NotImplementedError("Not yet implemented.")
 
 if __name__ == '__main__':
     router(sys.argv[2][1:])
